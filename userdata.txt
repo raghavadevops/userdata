@@ -1,18 +1,28 @@
-#!/bin/sh
-yum install wget -y
-#install apache and php dependencies
-yum install httpd php php-common php-mysql php-gd php-xml php-mbstring php-mcrypt -y 
+#!/bin/bash
+yum install unzip wget -y
 
-#start apache
-systemctl start httpd
+#Download java
 cd /tmp
-wget http://wordpress.org/latest.tar.gz
-tar -xvzf latest.tar.gz  
-cd wordpress
-cp wp-config-sample.php wp-config.php
-sed 's/database_name_here/wordpress/g' wp-config.php
-sed -i 's/username_here/wordpress/g' wp-config.php
-sed -i  's/password_here/1qa2ws3ed/g' wp-config.php
-sed -i  's/localhost/wordpress.cgcwfbspk6kn.us-west-2.rds.amazonaws.com/g' wp-config.php
-cp -r * /var/www/html/
-systemctl restart httpd
+
+wget -c --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.rpm
+
+
+#install java
+rpm -ivh jdk-8u131-linux-x64.rpm
+
+#Download tomcat
+wget http://www-eu.apache.org/dist/tomcat/tomcat-8/v8.5.32/bin/apache-tomcat-8.5.32-windows-x64.zip
+unzip apache-tomcat-8.5.32-windows-x64.zip
+mv apache-tomcat-8.5.32 /opt/tomcat
+chmod -R 755 /opt/tomcat
+#start tomcat service
+/opt/tomcat/bin/startup.sh
+cp -r /opt/tomcat /opt/tomcat2
+#update tomcat2 ports
+sed -i 's/8005/8205/g' /opt/tomcat2/conf/server.xml
+sed -i 's/8080/8280/g' /opt/tomcat2/conf/server.xml
+sed -i 's/8443/8243/g' /opt/tomcat2/conf/server.xml
+sed -i 's/8009/8209/g' /opt/tomcat2/conf/server.xml
+/opt/tomcat2/bin/startup.sh
+ps -ef | grep tomcat2
+netstat -anlp | grep ":8280"
